@@ -1,27 +1,204 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Shift the entire mood toward deep forest greens */
+  --color-bg: #06150f;
+  --color-bg-light: #082018;
+  /* Keep variable names for compatibility, but shift palette to green tones */
+  --color-gold: #34d399;
+  --color-gold-light: #a7f3d0;
+  --color-gold-dim: rgba(52, 211, 153, 0.3);
+  --color-cream: #f5f0e8;
+  --color-cream-dim: rgba(212, 208, 200, 0.45);
+  --color-glass: rgba(255, 255, 255, 0.03);
+  --color-glass-border: rgba(52, 211, 153, 0.12);
+
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: var(--color-cream);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: rgba(52, 211, 153, 0.3);
+    color: var(--color-cream);
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Forest themed backdrop */
+.forest-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(900px 600px at 50% 10%, rgba(52, 211, 153, 0.08), transparent 60%),
+    radial-gradient(800px 500px at 20% 40%, rgba(16, 185, 129, 0.06), transparent 65%),
+    radial-gradient(900px 700px at 80% 55%, rgba(34, 197, 94, 0.05), transparent 60%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(6, 21, 15, 0.85) 65%, rgba(6, 21, 15, 1) 100%),
+    /* subtle tree silhouettes (inline svg) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='600' viewBox='0 0 1400 600'%3E%3Cg fill='%23000000' opacity='0.28'%3E%3Cpath d='M0 520c90-80 120-140 180-210 30-35 60-70 80-110 20 55 50 95 90 140 70 80 100 120 160 180H0z'/%3E%3Cpath d='M360 540c80-70 120-120 170-190 25-35 45-65 60-100 18 48 40 80 80 120 60 60 95 105 155 170H360z'/%3E%3Cpath d='M760 545c90-75 140-130 200-210 30-40 55-75 75-120 20 55 50 95 95 140 80 80 120 125 220 190H760z'/%3E%3Cpath d='M1100 555c70-60 105-105 150-165 22-30 40-55 55-85 14 36 30 58 60 90 55 55 85 95 135 160h-400z'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat-x;
+  background-size: cover, cover, cover, cover, 1400px 600px;
+  background-position: center, center, center, center, bottom center;
+  filter: saturate(1.1);
+  opacity: 0.95;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@layer components {
+  .glass-card {
+    background: var(--color-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 1rem;
   }
+
+  .gold-glow {
+    box-shadow: 0 0 60px rgba(52, 211, 153, 0.08),
+      0 0 120px rgba(52, 211, 153, 0.04);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1.1rem 2.5rem;
+    background: linear-gradient(
+      135deg,
+      rgba(52, 211, 153, 0.15),
+      rgba(52, 211, 153, 0.05)
+    );
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    border-radius: 0.5rem;
+    color: var(--color-gold-light);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    letter-spacing: 0.35em;
+    background: linear-gradient(
+      135deg,
+      rgba(52, 211, 153, 0.22),
+      rgba(52, 211, 153, 0.08)
+    );
+    box-shadow: 0 0 30px rgba(52, 211, 153, 0.1);
+  }
+
+  @media (min-width: 768px) {
+    .btn-primary {
+      width: auto;
+      min-width: 280px;
+    }
+  }
+
+  .section-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    font-weight: 400;
+  }
+
+  .heading-display {
+    font-family: var(--font-heading);
+    color: var(--color-cream);
+    font-weight: 400;
+    line-height: 1.15;
+  }
+
+  .text-body {
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--color-cream-dim);
+    font-size: 0.9rem;
+  }
+
+  @media (min-width: 768px) {
+    .text-body {
+      font-size: 1rem;
+    }
+  }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-gold-dim),
+      transparent
+    );
+    margin: 0 auto;
+  }
+}
+
+/* Film grain overlay */
+.film-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+}
+
+.film-grain svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(52, 211, 153, 0.2);
+  border-radius: 2px;
+}
+
+/* Chat bubbles */
+.chat-bubble {
+  max-width: 80%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.chat-bubble-right {
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  border-bottom-right-radius: 0.25rem;
+  margin-left: auto;
+}
+
+.chat-bubble-left {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom-left-radius: 0.25rem;
+  margin-right: auto;
 }
