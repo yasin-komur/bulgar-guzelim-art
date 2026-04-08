@@ -6,11 +6,11 @@ import { useEffect, useRef } from "react";
 
 function createConfetti(container: HTMLDivElement) {
   const colors = [
-    "rgba(52,211,153,0.85)",
-    "rgba(167,243,208,0.85)",
-    "rgba(52,211,153,0.55)",
+    "rgba(96,165,250,0.85)",
+    "rgba(147,197,253,0.85)",
+    "rgba(96,165,250,0.55)",
     "rgba(245,240,232,0.6)",
-    "rgba(52,211,153,0.35)",
+    "rgba(96,165,250,0.35)",
   ];
 
   for (let i = 0; i < 80; i++) {
@@ -103,7 +103,7 @@ export default function FinalPage() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at center 30%, rgba(6,21,15,0.7) 0%, rgba(6,21,15,0.95) 70%)",
+              "radial-gradient(ellipse at center 30%, rgba(5,11,26,0.7) 0%, rgba(5,11,26,0.95) 70%)",
           }}
         />
       </div>

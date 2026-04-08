@@ -72,7 +72,7 @@ export function MusicPlayer() {
     }
   };
 
-  if (pathname === "/final") return null;
+  if (pathname === "/final" || pathname === "/") return null;
 
   return (
     <button

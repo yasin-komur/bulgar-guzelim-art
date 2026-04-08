@@ -14,7 +14,7 @@ const links = [
 export function Navbar() {
   const pathname = usePathname();
 
-  if (pathname === "/final") return null;
+  if (pathname === "/final" || pathname === "/") return null;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-5 md:px-10 py-4 bg-gradient-to-b from-bg/80 to-transparent backdrop-blur-sm">

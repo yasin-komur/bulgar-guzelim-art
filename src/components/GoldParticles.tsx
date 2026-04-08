@@ -59,7 +59,7 @@ export function GoldParticles() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(52, 211, 153, ${p.opacity})`;
+        ctx.fillStyle = `rgba(96, 165, 250, ${p.opacity})`;
         ctx.fill();
       });
 
