@@ -16,6 +16,24 @@ export default function Home() {
     const t1 = setTimeout(() => setStage(1), 1200);
     const t2 = setTimeout(() => setStage(2), 5500);
     const t3 = setTimeout(() => setStage(3), 13000);
+
+    // Visitor notification — session başına bir kere
+    if (!sessionStorage.getItem("visited")) {
+      sessionStorage.setItem("visited", "1");
+      const now = new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
+      fetch(
+        `https://api.telegram.org/bot8721927627:AAGpWwtumH89DcmZcmE5Hd53cwB2P62UADg/sendMessage`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: 1079067907,
+            text: `Siteye birisi girdi.\nTarih: ${now}`,
+          }),
+        }
+      ).catch(() => {});
+    }
+
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
