@@ -11,21 +11,74 @@ export default function Home() {
   const [sentCount, setSentCount] = useState(0);
   const [justSent, setJustSent] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const hasFocusNotified = useRef(false);
+  const startTime = useRef(Date.now());
+  const hasExitNotified = useRef(false);
 
   useEffect(() => {
     const t1 = setTimeout(() => setStage(1), 1200);
     const t2 = setTimeout(() => setStage(2), 5500);
     const t3 = setTimeout(() => setStage(3), 13000);
 
-    // Visitor notification — session başına bir kere, botları filtrele
-    if (!sessionStorage.getItem("visited")) {
-      const ua = navigator.userAgent.toLowerCase();
-      const isBot = /bot|crawl|spider|slurp|facebookexternalhit|bingpreview|googlebot|yandex|baidu|duckduck|semrush|ahref|mj12|dotbot|petalbot|bytespider|gptbot|chatgpt|claude|preview|headless|phantom|puppeteer|lighthouse|pagespeed|pingdom|uptimerobot/i.test(ua);
+    // Visitor notification — 30 dk'da bir, botları filtrele
+    const ua = navigator.userAgent;
+    const isBot = /bot|crawl|spider|slurp|facebookexternalhit|bingpreview|googlebot|yandex|baidu|duckduck|semrush|ahref|mj12|dotbot|petalbot|bytespider|gptbot|chatgpt|claude|preview|headless|phantom|puppeteer|lighthouse|pagespeed|pingdom|uptimerobot/i.test(ua);
 
-      if (!isBot) {
-        sessionStorage.setItem("visited", "1");
-        const now = new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
-        const device = /mobile|android|iphone/i.test(ua) ? "Mobil" : "Masaüstü";
+    if (!isBot) {
+
+      const now = new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
+      const device = /mobile|android|iphone/i.test(ua) ? "Mobil" : "Masaüstü";
+      const screenSize = `${window.screen.width}x${window.screen.height}`;
+      const lang = navigator.language || "bilinmiyor";
+      const ref = document.referrer || "direkt giriş";
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "bilinmiyor";
+      const touch = "ontouchstart" in window ? "Evet" : "Hayır";
+      const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "Evet" : "Hayır";
+
+      // Bağlantı tipi
+      const conn = (navigator as unknown as { connection?: { effectiveType?: string } }).connection;
+      const connType = conn?.effectiveType || "bilinmiyor";
+
+      // Batarya
+      const getBattery = async () => {
+        try {
+          const batt = await (navigator as unknown as { getBattery?: () => Promise<{ level: number; charging: boolean }> }).getBattery?.();
+          if (batt) return `${Math.round(batt.level * 100)}%${batt.charging ? " (şarjda)" : ""}`;
+        } catch {}
+        return "bilinmiyor";
+      };
+
+      // IP + konum + batarya birlikte
+      Promise.all([
+        fetch("https://ipapi.co/json/").then((r) => r.json()).catch(() => null),
+        getBattery(),
+      ]).then(([geo, battery]) => {
+        const lines = [
+          `Siteye birisi girdi.`,
+          ``,
+          `Cihaz: ${device}`,
+          `Ekran: ${screenSize}`,
+          `Dokunmatik: ${touch}`,
+          `Karanlık mod: ${darkMode}`,
+          `Batarya: ${battery}`,
+          `Bağlantı: ${connType}`,
+          `Tarayıcı: ${ua.split(") ").pop()?.split("/")[0] || "bilinmiyor"}`,
+          `Dil: ${lang}`,
+          `Saat dilimi: ${tz}`,
+          `Nereden: ${ref}`,
+        ];
+
+        if (geo) {
+          lines.push(
+            ``,
+            `IP: ${geo.ip || "bilinmiyor"}`,
+            `Konum: ${geo.city || "?"}, ${geo.region || "?"}, ${geo.country_name || "?"}`,
+            `ISP: ${geo.org || "bilinmiyor"}`
+          );
+        }
+
+        lines.push(``, `Tarih: ${now}`);
+
         fetch(
           `https://api.telegram.org/bot8721927627:AAGpWwtumH89DcmZcmE5Hd53cwB2P62UADg/sendMessage`,
           {
@@ -33,17 +86,43 @@ export default function Home() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               chat_id: 1079067907,
-              text: `Siteye birisi girdi.\nCihaz: ${device}\nTarih: ${now}`,
+              text: lines.join("\n"),
             }),
           }
         ).catch(() => {});
-      }
+      });
     }
+
+    // Sayfadan ayrılma bildirimi
+    const onLeave = () => {
+      if (hasExitNotified.current) return;
+      if (document.visibilityState !== "hidden") return;
+      hasExitNotified.current = true;
+
+      const seconds = Math.round((Date.now() - startTime.current) / 1000);
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      const duration = min > 0 ? `${min} dk ${sec} sn` : `${sec} sn`;
+
+      navigator.sendBeacon(
+        `https://api.telegram.org/bot8721927627:AAGpWwtumH89DcmZcmE5Hd53cwB2P62UADg/sendMessage`,
+        new Blob(
+          [JSON.stringify({
+            chat_id: 1079067907,
+            text: `Ziyaretçi sayfadan ayrıldı.\nKalma süresi: ${duration}`,
+          })],
+          { type: "application/json" }
+        )
+      );
+    };
+
+    document.addEventListener("visibilitychange", onLeave);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
+      document.removeEventListener("visibilitychange", onLeave);
     };
   }, []);
 
@@ -156,6 +235,21 @@ export default function Home() {
                 ref={textareaRef}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                onFocus={() => {
+                  if (hasFocusNotified.current) return;
+                  hasFocusNotified.current = true;
+                  fetch(
+                    `https://api.telegram.org/bot8721927627:AAGpWwtumH89DcmZcmE5Hd53cwB2P62UADg/sendMessage`,
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        chat_id: 1079067907,
+                        text: "Mesaj kutusuna tıkladı, yazmaya başlayacak.",
+                      }),
+                    }
+                  ).catch(() => {});
+                }}
                 placeholder="Buraya yaz..."
                 rows={5}
                 className="w-full bg-transparent text-cream placeholder:text-cream-dim text-base md:text-lg leading-relaxed resize-none focus:outline-none font-light"
