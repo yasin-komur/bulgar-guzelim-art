@@ -17,21 +17,27 @@ export default function Home() {
     const t2 = setTimeout(() => setStage(2), 5500);
     const t3 = setTimeout(() => setStage(3), 13000);
 
-    // Visitor notification — session başına bir kere
+    // Visitor notification — session başına bir kere, botları filtrele
     if (!sessionStorage.getItem("visited")) {
-      sessionStorage.setItem("visited", "1");
-      const now = new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
-      fetch(
-        `https://api.telegram.org/bot8721927627:AAGpWwtumH89DcmZcmE5Hd53cwB2P62UADg/sendMessage`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: 1079067907,
-            text: `Siteye birisi girdi.\nTarih: ${now}`,
-          }),
-        }
-      ).catch(() => {});
+      const ua = navigator.userAgent.toLowerCase();
+      const isBot = /bot|crawl|spider|slurp|facebookexternalhit|bingpreview|googlebot|yandex|baidu|duckduck|semrush|ahref|mj12|dotbot|petalbot|bytespider|gptbot|chatgpt|claude|preview|headless|phantom|puppeteer|lighthouse|pagespeed|pingdom|uptimerobot/i.test(ua);
+
+      if (!isBot) {
+        sessionStorage.setItem("visited", "1");
+        const now = new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
+        const device = /mobile|android|iphone/i.test(ua) ? "Mobil" : "Masaüstü";
+        fetch(
+          `https://api.telegram.org/bot8721927627:AAGpWwtumH89DcmZcmE5Hd53cwB2P62UADg/sendMessage`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: 1079067907,
+              text: `Siteye birisi girdi.\nCihaz: ${device}\nTarih: ${now}`,
+            }),
+          }
+        ).catch(() => {});
+      }
     }
 
     return () => {
